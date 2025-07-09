@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Motivating File Splitter</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 50px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 600px;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 2rem;
+      color: #0072ff;
+    }
+
+    .motivational {
+      text-align: center;
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 25px;
+    }
+
+    .legacy-message {
+      background: #e6f4ff;
+      padding: 15px;
+      margin-top: 30px;
+      border-left: 4px solid #0072ff;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .song-section {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 0.95rem;
+      background: #fff7e6;
+      padding: 15px;
+      border-left: 4px solid #ffc107;
+      border-radius: 8px;
+    }
+
+    input[type="file"],
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #0072ff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #005fd1;
+    }
+
+    .file-list {
+      margin-top: 20px;
+    }
+
+    .file-item {
+      padding: 10px;
+      background: #f0f4ff;
+      border-left: 4px solid #0072ff;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .download-link {
+      font-size: 0.85rem;
+      color: #0072ff;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .download-all {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .download-all button {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      color: white;
+      margin: 0 5px;
+    }
+
+    .download-all button:first-child {
+      background-color: #28a745;
+    }
+    .download-all button:first-child:hover {
+      background-color: #218838;
+    }
+
+    .download-all button:last-child {
+      background-color: #dc3545;
+    }
+    .download-all button:last-child:hover {
+      background-color: #b02a37;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Split Your Files Like a Pro</h1>
+    <p class="motivational">Stay organized. Stay sharp. You got this. 💪</p>
+
+    <input type="file" id="fileInput" multiple />
+    <input type="number" id="splitCount" min="1" value="2" placeholder="Number of parts" />
+    <button onclick="splitFiles()">Split Files</button>
+
+    <div class="file-list" id="fileList"></div>
+    <div class="download-all" id="downloadAllContainer" style="display: none;">
+      <button onclick="downloadAllFiles()">⬇️ Download All Files</button>
+      <button onclick="clearHistory()">🗑️ Clear History</button>
+    </div>
+
+    <div class="song-section" id="songOfTheDay" style="display: none;"></div>
+
+    <div class="legacy-message">
+      <strong>Hi Engage3 Superstar,</strong><br><br>
+      If you’re reading this, then you’re exactly where you need to be — part of a team that creates, innovates, and grows together. I’ve had the privilege of walking this path with you, and as I move forward, I’m leaving behind this small legacy to remind you: <strong>keep being amazing</strong>.
+      <br><br>
+      Let your talent speak loudly, your curiosity burn brightly, and never forget how far your potential can take you. You’ve got everything it takes — and more.
+      <br><br>
+      With gratitude and pride,<br>
+      <em>– Laureta 💙</em>
+    </div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const fileList = document.getElementById("fileList");
+    const downloadAllContainer = document.getElementById("downloadAllContainer");
+    const songSection = document.getElementById("songOfTheDay");
+    const generatedBlobs = [];
+
+    const songs = [
+      "🎵 Don't Stop Believin' – Journey",
+      "🎵 Hotel California' – Eagles",
+      "🎵 Eye of the Tiger – Survivor",
+      "🎵 Unstoppable – Sia",
+      "🎵 Hall of Fame – The Script",
+      "🎵 Good as Hell – Lizzo",
+      "🎵 Stronger – Kanye West",
+      "🎵 Fight Song – Rachel Platten",
+      "🎵 Rise Up – Andra Day",
+      "🎵 Titanium – David Guetta ft. Sia",
+      "🎵 Believer – Imagine Dragons"
+    ];
+
+    fileInput.addEventListener("change", () => {
+      fileList.innerHTML = "";
+      downloadAllContainer.style.display = "none";
+      generatedBlobs.length = 0;
+      songSection.style.display = "none";
+
+      Array.from(fileInput.files).forEach(file => {
+        const item = document.createElement("div");
+        item.className = "file-item";
+        item.textContent = `${file.name} — ${(file.size / 1024).toFixed(2)} KB`;
+        fileList.appendChild(item);
+      });
+    });
+
+    function splitFiles() {
+      const count = parseInt(document.getElementById("splitCount").value);
+      if (!fileInput.files.length || !count || count < 1) {
+        alert("Please select files and set a valid split count.");
+        return;
+      }
+
+      fileList.innerHTML += `<div class="file-item" style="font-weight: bold;">✅ Files are split and ready to download!</div>`;
+
+      Array.from(fileInput.files).forEach(file => {
+        const chunkSize = Math.ceil(file.size / count);
+        let offset = 0;
+
+        for (let i = 0; i < count; i++) {
+          const chunk = file.slice(offset, offset + chunkSize);
+          const blob = new Blob([chunk], { type: file.type });
+          const fileName = `${file.name.replace(/\.[^/.]+$/, "")}_part${i + 1}${file.name.slice(file.name.lastIndexOf("."))}`;
+          const url = URL.createObjectURL(blob);
+
+          generatedBlobs.push({ url, fileName });
+
+          const container = document.createElement("div");
+          container.className = "file-item";
+
+          const label = document.createElement("span");
+          label.textContent = `${fileName}`;
+
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = fileName;
+          link.className = "download-link";
+          link.textContent = "Download";
+
+          container.appendChild(label);
+          container.appendChild(link);
+          fileList.appendChild(container);
+
+          offset += chunkSize;
+        }
+      });
+
+      downloadAllContainer.style.display = "block";
+
+      // Show random song of the day
+      const song = songs[Math.floor(Math.random() * songs.length)];
+      songSection.textContent = `🎧 Your Song of the Day: ${song}`;
+      songSection.style.display = "block";
+    }
+
+    function downloadAllFiles() {
+      generatedBlobs.forEach(({ url, fileName }) => {
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+    }
+
+    function clearHistory() {
+      fileList.innerHTML = "";
+      generatedBlobs.length = 0;
+      downloadAllContainer.style.display = "none";
+      songSection.style.display = "none";
+      fileInput.value = "";
+    }
+  </script>
+</body>
+</html>
